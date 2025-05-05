@@ -1,0 +1,94 @@
+
+from flask import Flask
+import sqlite3
+
+app = Flask(__name__)
+
+def data():
+    conn = sqlite3.connect("kurzy.db")
+    return conn
+
+@app.route('/')  
+def index():
+    return '''
+        <h1>Výber z databázy</h1>
+        <a href="/kurzy"><button>Zobraz všetky kurzy</button></a>
+        <a href="/treneri"><button>Zobraz všetkých trénerov</button></a>
+        <a href="/miesta"><button>Zobraz všetky miesta</button></a>
+        <a href="/max_kap"><button>Súčet max. počtu účastníkov kurzov, kt. začínajú na 'P'</button></a>
+        <hr>
+    '''
+
+@app.route('/kurzy')  
+def zobraz_kurzy():
+    conn = data()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM Kurzy")
+    kurzy = cursor.fetchall()
+
+    conn.close()
+
+    vystup = "<h2>Zoznam kurzov:</h2>" 
+    for kurz in kurzy:
+        vystup += f"<p>{kurz}</p>"      
+
+    vystup += '<a href="/">Späť</a>'    
+    return vystup
+
+
+@app.route('/treneri')  
+def zobraz_trenerov():
+    conn = data()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT T.ID_trenera, T.Meno || ' ' || T.Priezvisko as Trener, Nazov_kurzu
+        FROM Treneri T LEFT JOIN Kurzy K ON T.ID_trenera = K.ID_trenera
+    """)
+    treneri = cursor.fetchall()
+
+    conn.close()
+    vystup = "<h2>Zoznam trénerov a kurzov:</h2>"
+    for trener in treneri:
+        vystup += f"<p>{trener}</p>"
+
+    vystup += '<a href="/">Späť</a>'
+    return vystup
+
+
+@app.route('/miesta')
+def miesta():
+    conn = data()
+    cursor = conn.cursor()
+
+    cursor.execute(""" SELECT Nazov_miesta FROM Miesta """)
+    miesta = cursor.fetchall()
+    conn.close()
+
+    vystup = "<h2>Zoznam všetkých miest: </h2>"
+    for miesto in miesta:
+        vystup += f"<p>{miesto}</p>"
+    vystup += '<a href="/">Späť</a>'
+    return vystup
+
+
+@app.route('/max_kap')
+def kapacita():
+    conn = data()
+    cursor = conn.cursor()
+
+    cursor.execute(""" SELECT SUM(Max_pocet_ucastnikov) FROM Kurzy WHERE Nazov_kurzu LIKE 'P%' """)
+    max_kap = cursor.fetchall()
+    conn.close()
+
+    vystup = "<h2>Súčet max. počtu účastníkov kurzov, kt. začínajú na 'P':  </h2>"
+    for x in max_kap:
+        vystup += f"<p>{x}</p>"
+    vystup += '<a href="/">Späť</a>'
+    return vystup
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
