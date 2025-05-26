@@ -4,13 +4,26 @@ from flask_sqlalchemy import SQLAlchemy
 import os 
 import sqlite3
 
+from flask import g, session
+from i18n import TRANSLATIONS, SUPPORTED
+
+
 app = Flask(__name__, instance_relative_config=True)
+app.secret_key = "tajnykluc"
 
 db_path = os.path.join(app.instance_path, "kurzy.db")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}".replace("\\", "/")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
+@app.before_request
+def set_lang():
+    lang = request.args.get("lang")
+    if lang not in SUPPORTED:
+        lang = session.get("lang", "sk")
+    session["lang"] = lang
+    g.t = TRANSLATIONS[lang]
 
 class Kurz(db.Model):
     __tablename__ = "Kurzy"
@@ -62,7 +75,6 @@ def index():
     return render_template("home.html")
         
 
-
 @app.route('/kurzy')  
 def zobraz_kurzy():
     kurzy = Kurz.query.all()
@@ -81,11 +93,11 @@ def miesta():
     return render_template("miesta.html",miesta = miesta)
 
 
-
 @app.route('/max_kap')
 def kapacita():
     kapacita = Maxkap.query.all()
     return render_template("maxkap.html",max_kap = kapacita)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
