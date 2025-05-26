@@ -24,6 +24,10 @@ def set_lang():
         lang = session.get("lang", "sk")
     session["lang"] = lang
     g.t = TRANSLATIONS[lang]
+    
+@app.context_processor
+def inject_translations():
+    return dict(t=g.t)
 
 class Kurz(db.Model):
     __tablename__ = "Kurzy"

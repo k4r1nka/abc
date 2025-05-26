@@ -6,12 +6,12 @@
     <title>Document</title>
 </head>
 <body>
-    <h2>Súčet max. počtu účastníkov kurzov, kt. začínajú na 'P':  </h2>
+    <h2> {{t.max}}  </h2>
 
     {% for maxkap in max_kap %}
         <p>{{ maxkap.Max_pocet_ucastnikov }}, {{ maxkap.ID_kurzu }}</p>
     {% endfor %}
 
-    <a href="/">Späť</a>
+    <a href="/">{{t.back}}</a>
 </body>
 </html>

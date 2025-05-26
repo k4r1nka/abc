@@ -6,12 +6,12 @@
     <title>Document</title>
 </head>
 <body>
-    <h2>Zoznam všetkých miest: </h2>
+    <h2>{{ t.place }}</h2>
 
     {% for miesto in miesta %}
         <p>{{ miesto.Nazov_miesta }}, {{ miesto.Adresa }} </p>
     {% endfor %}
 
-    <a href="/">Späť</a>
+    <a href="/">{{ t.back }}</a>
 </body>
 </html>
